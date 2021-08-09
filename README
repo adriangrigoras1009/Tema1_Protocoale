@@ -1,0 +1,45 @@
+Grigoras Adrian, 322CC
+Tema 1
+
+----------------------------------------
+
+Structura route_table e pentru elementele tabelei de rutare
+Structura arp_table e pentru elemente tabelei ARP.
+(void read_rtable) parcurge tabela de rutare si o stocheaza
+(struct route_table caut) este algoritmul de cautare in tabela de rutare:
+    - se bazeaza pe o sortare qsort dupa prefix dupa ce am introdus toate elementele in tabela
+    - apoi fac o cautare binara pana gasesc ruta cea mai buna
+(get_arp_entry) parcurg tabela arp sa caut adresa mac
+
+Dupa ce primesc pachetu verific daca pachetul este de tip ARP sau ICMP
+Daca este ICMP:
+    verific daca e pt router si trimit un ECHOREPLY catre router
+    altfel, verific checksum-ul sa fie 0
+    apoi verific ttl-ul sa fie mai mare decat 1, altfel trimit TIME_EXCEEDED
+    updatez checksum-ul si scad ttl-ul
+    calculez cea mai buna ruta pt pachet cu algoritmul de cautare
+    Verific daca avem mac-ul next-hopului in tabela arp
+    Daca nu
+        trimit un arp request spre next_hop de la router 
+        si pun pachetul in coada pana cand o sa stiu mac-ul
+    altfel
+        pun mac-ul next-hopului in headeru de ethernet si trimit pachetul
+
+Daca este ARP:
+    daca primesc un arp request, verific pentru ce interfata a fost trimis
+        dupa ce am gasit interfata, calculez mac-ul interfetei
+        schimb headerul de ethernet si apoi trimit arp_reply
+    daca primesc un arp_reply, updatez tabela arp cu inca o adesa mac
+        apoi parcurg coada de pachete adunata
+        folosesc o coada auxiliara sa pastrez pachetele care nu trebuie dirijate
+        recalclulez best_route pt fiecare pachet
+        daca adresa next_hop este aceeasi cu cea de unde primesc arp-ul
+            trimit pachetul si eliberez memoria
+        daca nu
+            il pun in coada auxililara
+
+
+Nu stiu motivul pentru care la testele forward02 si forward03 primesc pe h2 un arp_reply in plus.
+In rest, totul merge ok, imi trec restul testelor.
+
+    
